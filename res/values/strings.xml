@@ -3034,7 +3034,6 @@
     <string name="enforce_read_external_confirm_title" product="default">Protect SD card?</string>
     <!-- Message of dialog confirming that user wants to protect external storage. [CHAR LIMIT=NONE] -->
     <string name="enforce_read_external_confirm_message" product="default">When SD card is protected, apps must request permission to read data from external storage.\n\nSome apps may not work until updated by their developers.</string>
-
     <!-- Setting checkbox title for root access -->
     <string name="root_access">Root access</string>
     <string name="root_access_warning_title">Allow root access?</string>
@@ -5038,4 +5037,9 @@
     <string name="tiles_reset_message">Restore the default displayed tiles and layout?</string>
 
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
+
+	<string name="volume_adjust_sounds_enable_title">Volume adjust sound</string>
+    <!-- Sound settings screen, setting check box summary -->
+    <string name="volume_adjust_sounds_enable_summary">Play sound when adjusting volume with hard keys</string>
+
 </resources>
