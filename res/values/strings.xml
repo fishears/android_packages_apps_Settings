@@ -4497,7 +4497,6 @@
     <string name="preview_version_title">Version</string>
     <string name="preview_country_title">Country</string>
     <string name="preview_carrier_title">Carrier</string>
-
     <!-- INTERFACE Settings  -->
     <!-- Settings main menu category heading. Interface (Launcher, Themes, System). [CHAR LIMIT=40] -->
     <string name="header_category_interface">INTERFACE</string>
@@ -4958,6 +4957,7 @@
     <string name="kill_app_longpress_back">Kill app back button</string>
     <string name="kill_app_longpress_back_summary">Kill the foreground app by long-pressing the back key</string>
 
+
     <!-- Change Log strings -->
     <string name="changelog_title">View changelog</string>
     <string name="changelog_loading">Loading changelog\u2026</string>
@@ -5136,4 +5136,14 @@
     <!-- Recents Ram Bar -->
     <string name="ram_bar">Recents RAM Bar</string>
     <string name="ram_bar_summary">Shows RAM usage in the recents menu</string>
+
+	<!-- Color Picker -->
+    <string name="dialog_color_picker">Color Picker</string>
+    <string name="press_color_to_apply">Press on Color to apply</string>
+    <string name="arrow_right">→</string>
+    <string name="arrow_down">↓</string>
+    <string name="hex">Hex:</string>
+    <string name="hex_hint">#FF000000</string>
+    <string name="set">Set</string>
+    <string name="ics_color">Holo</string>
 </resources>
