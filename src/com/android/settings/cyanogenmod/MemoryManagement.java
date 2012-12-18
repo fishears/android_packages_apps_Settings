@@ -52,12 +52,22 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
     private static final String PURGEABLE_ASSETS_PERSIST_PROP = "persist.sys.purgeable_assets";
 
     private static final String PURGEABLE_ASSETS_DEFAULT = "0";
+    
+    public static final String BIGMEM_FILE = "/sys/kernel/bigmem/enable";
+    
+    public static final String BIGMEM_PREF = "pref_bigmem";
+    
+    public static final String BIGMEM_DISABLED = "0";
+    
+    public static final String BIGMEM_ENABLED = "1";
 
     private ListPreference mzRAM;
 
     private CheckBoxPreference mPurgeableAssetsPref;
 
     private CheckBoxPreference mKSMPref;
+    
+    private CheckBoxPreference mBigmem;
 
     private int swapAvailable = -1;
 
@@ -74,6 +84,7 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
             mzRAM = (ListPreference) prefSet.findPreference(ZRAM_PREF);
             mPurgeableAssetsPref = (CheckBoxPreference) prefSet.findPreference(PURGEABLE_ASSETS_PREF);
             mKSMPref = (CheckBoxPreference) prefSet.findPreference(KSM_PREF);
+            mBigmem =  (CheckBoxPreference) prefSet.findPreference(BIGMEM_PREF);
 
             if (isSwapAvailable()) {
                 if (SystemProperties.get(ZRAM_PERSIST_PROP) == "1")
@@ -88,6 +99,12 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 mKSMPref.setChecked(KSM_PREF_ENABLED.equals(Utils.fileReadOneLine(KSM_RUN_FILE)));
             } else {
                 prefSet.removePreference(mKSMPref);
+            }
+            
+            if (Utils.fileExists(BIGMEM_FILE)) {
+                mBigmem.setChecked(BIGMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
+            } else {
+                prefSet.removePreference(mBigmem);
             }
 
             String purgeableAssets = SystemProperties.get(PURGEABLE_ASSETS_PERSIST_PROP,
@@ -108,6 +125,11 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
 
         if (preference == mKSMPref) {
             Utils.fileWriteOneLine(KSM_RUN_FILE, mKSMPref.isChecked() ? "1" : "0");
+            return true;
+        }
+        
+        if (preference == mBigmem) {
+            Utils.fileWriteOneLine(BIGMEM_FILE, mBigmem.isChecked() ? "1" : "0");
             return true;
         }
 

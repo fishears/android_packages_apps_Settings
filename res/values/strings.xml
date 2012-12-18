@@ -4703,6 +4703,9 @@
     <!-- Purgeable Assets -->
     <string name="pref_purgeable_assets_title">Allow purging of assets</string>
     <string name="pref_purgeable_assets_summary">Purging of bitmap memory assets allows the freeing of more RAM when needed (requires reboot)</string>
+    <!-- Bigmem -->
+    <string name="pref_bigmem_title">Enable bigmem</string>
+    <string name="pref_bigmem_summary">More free RAM (requires reboot)</string>
 
     <!-- Performance Settings : Dithering -->
     <string name="pref_use_dithering_title">Surface improvement</string>
