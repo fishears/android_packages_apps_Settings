@@ -22,10 +22,12 @@
         android:key="pref_general_settings"
         android:title="@string/title_general" >
 
-        <CheckBoxPreference
+        <ListPreference
             android:key="quick_pulldown"
             android:title="@string/title_quick_pulldown"
-            android:summary="@string/summary_quick_pulldown" />
+            android:entries="@array/quick_pulldown_entries"
+            android:entryValues="@array/quick_pulldown_values"
+            android:persistent="false" />
 
         <CheckBoxPreference
             android:key="collapse_panel"
@@ -51,6 +53,13 @@
             android:summary="@string/pref_ring_mode_summary"
             android:entries="@array/entries_ring_widget"
             android:entryValues="@array/values_ring_widget" />
+
+        <ListPreference
+            android:key="pref_network_mode"
+            android:dialogTitle="@string/pref_network_mode_title"
+            android:title="@string/pref_network_mode_title"
+            android:entries="@array/entries_network_widget"
+            android:entryValues="@array/values_network_widget" />
 
         </PreferenceCategory>
 
