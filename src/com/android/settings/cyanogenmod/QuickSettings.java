@@ -19,13 +19,13 @@ package com.android.settings.cyanogenmod;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -49,6 +49,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
     private static final String SEPARATOR = "OV=I=XseparatorX=I=VO";
     private static final String EXP_RING_MODE = "pref_ring_mode";
     private static final String EXP_NETWORK_MODE = "pref_network_mode";
+    private static final String EXP_SCREENTIMEOUT_MODE = "pref_screentimeout_mode";
     private static final String DYNAMIC_ALARM = "dynamic_alarm";
     private static final String DYNAMIC_BUGREPORT = "dynamic_bugreport";
     private static final String DYNAMIC_IME = "dynamic_ime";
@@ -58,6 +59,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
 
     MultiSelectListPreference mRingMode;
     ListPreference mNetworkMode;
+    ListPreference mScreenTimeoutMode;
     CheckBoxPreference mDynamicAlarm;
     CheckBoxPreference mDynamicBugReport;
     CheckBoxPreference mDynamicWifi;
@@ -108,6 +110,11 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
         mNetworkMode = (ListPreference) prefSet.findPreference(EXP_NETWORK_MODE);
         mNetworkMode.setSummary(mNetworkMode.getEntry());
         mNetworkMode.setOnPreferenceChangeListener(this);
+
+        // Screen timeout mode
+        mScreenTimeoutMode = (ListPreference) prefSet.findPreference(EXP_SCREENTIMEOUT_MODE);
+        mScreenTimeoutMode.setSummary(mScreenTimeoutMode.getEntry());
+        mScreenTimeoutMode.setOnPreferenceChangeListener(this);
 
         // Add the dynamic tiles checkboxes
         mDynamicAlarm = (CheckBoxPreference) prefSet.findPreference(DYNAMIC_ALARM);
@@ -161,6 +168,12 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
         if (Settings.System.getInt(resolver, Settings.System.SYSTEM_PROFILES_ENABLED, 1) != 1) {
             QuickSettingsUtil.TILES.remove(QuickSettingsUtil.TILE_PROFILE);
         }
+
+        // Dont show the NFC tile if not supported
+        if (NfcAdapter.getDefaultAdapter(getActivity()) == null) {
+            QuickSettingsUtil.TILES.remove(QuickSettingsUtil.TILE_NFC);
+        }
+
     }
 
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
@@ -224,6 +237,13 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
             Settings.System.putInt(resolver, Settings.System.QS_QUICK_PULLDOWN,
                     statusQuickPulldown);
             updatePulldownSummary();
+            return true;
+        } else if (preference == mScreenTimeoutMode) {
+            int value = Integer.valueOf((String) newValue);
+            int index = mScreenTimeoutMode.findIndexOfValue((String) newValue);
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.EXPANDED_SCREENTIMEOUT_MODE, value);
+            mScreenTimeoutMode.setSummary(mScreenTimeoutMode.getEntries()[index]);
             return true;
         }
         return false;
