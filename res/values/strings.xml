@@ -5086,5 +5086,10 @@
 	<string name="volume_adjust_sounds_enable_title">Volume adjust sound</string>
     <!-- Sound settings screen, setting check box summary -->
     <string name="volume_adjust_sounds_enable_summary">Play sound when adjusting volume with hard keys</string>
+    
+    <!-- High End Gfx Effects -->
+ 	<string name="display_category_advanced_title">Advanced</string>
+ 	<string name="high_end_gfx_title">High end graphic effects</string>
+ 	<string name="high_end_gfx_summary">Enable graphic effects disabled on lower end devices</string>
 
 </resources>
