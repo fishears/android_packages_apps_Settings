@@ -41,5 +41,10 @@
         android:key="pref_bigmem"
         android:title="@string/pref_bigmem_title"
         android:summary="@string/pref_bigmem_summary" />
+	
+    <CheckBoxPreference
+        android:key="pref_hugemem"
+        android:title="@string/pref_hugemem_title"
+        android:summary="@string/pref_hugemem_summary" />
 
 </PreferenceScreen>

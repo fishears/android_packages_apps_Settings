@@ -60,6 +60,12 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
     public static final String BIGMEM_DISABLED = "0";
     
     public static final String BIGMEM_ENABLED = "1";
+    
+    public static final String HUGEMEM_PREF = "pref_hugemem";
+    
+    public static final String HUGEMEM_DISABLED = "0";
+    
+    public static final String HUGEMEM_ENABLED = "2";
 
     private ListPreference mzRAM;
 
@@ -68,6 +74,8 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
     private CheckBoxPreference mKSMPref;
     
     private CheckBoxPreference mBigmem;
+    
+    private CheckBoxPreference mHugemem;
 
     private int swapAvailable = -1;
 
@@ -85,6 +93,7 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
             mPurgeableAssetsPref = (CheckBoxPreference) prefSet.findPreference(PURGEABLE_ASSETS_PREF);
             mKSMPref = (CheckBoxPreference) prefSet.findPreference(KSM_PREF);
             mBigmem =  (CheckBoxPreference) prefSet.findPreference(BIGMEM_PREF);
+            mHugemem =  (CheckBoxPreference) prefSet.findPreference(HUGEMEM_PREF);
 
             if (isSwapAvailable()) {
                 if (SystemProperties.get(ZRAM_PERSIST_PROP) == "1")
@@ -105,6 +114,12 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 mBigmem.setChecked(BIGMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
             } else {
                 prefSet.removePreference(mBigmem);
+            }
+            
+            if (Utils.fileExists(BIGMEM_FILE)) {
+                mHugemem.setChecked(HUGEMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
+            } else {
+                prefSet.removePreference(mHugemem);
             }
 
             String purgeableAssets = SystemProperties.get(PURGEABLE_ASSETS_PERSIST_PROP,
@@ -130,6 +145,13 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
         
         if (preference == mBigmem) {
             Utils.fileWriteOneLine(BIGMEM_FILE, mBigmem.isChecked() ? "1" : "0");
+            mHugemem.setChecked(HUGEMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
+            return true;
+        }
+        
+        if (preference == mHugemem) {
+            Utils.fileWriteOneLine(BIGMEM_FILE, mHugemem.isChecked() ? "2" : "0");
+            mBigmem.setChecked(BIGMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
             return true;
         }
 
