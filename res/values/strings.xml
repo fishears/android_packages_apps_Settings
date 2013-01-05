@@ -874,6 +874,7 @@
     <string name="lock_pattern_size_4">4x4</string>
     <string name="lock_pattern_size_5">5x5</string>
     <string name="lock_pattern_size_6">6x6</string>
+
     <!-- Title for option to turn of password/pin/pattern unlock. [CHAR LIMIT=22] -->
     <string name="unlock_disable_lock_title">Turn off screen lock</string>
 
@@ -3138,6 +3139,8 @@
         screen magnification on app transitions</string>
     <!-- Title for the accessibility preference to power button to end a call. [CHAR LIMIT=35] -->
     <string name="accessibility_power_button_ends_call_prerefence_title">Power button ends call</string>
+    <!-- Title for the accessibility preference to home button to answers a call. [CHAR LIMIT=35] -->
+    <string name="accessibility_home_button_answers_call_prerefence_title">Home button answers call</string>
     <!-- Title for the accessibility preference to speak passwords. [CHAR LIMIT=35] -->
     <string name="accessibility_toggle_speak_password_preference_title">Speak passwords</string>
     <!-- Title for accessibility preference to choose long-press delay i.e. timeout before it is detected. [CHAR LIMIT=35] -->
@@ -5093,7 +5096,12 @@
     <string name="lock_clock_title">Clock widget</string>
     <string name="lock_clock_summary">View or change how the \'Chronus\' Home and Lock screen widgets will display</string>
 
-<string name="keyguard_picker_all_widgets_title">Show all widgets</string>
+    <!-- Stylus Icon -->
+    <string name="stylus_icon_enabled_title">Show icon when using stylus</string>
+    <string name="stylus_icon_enabled_summary">Show the pointer icon when hovering or drawing with the stylus</string>
+
+	<string name="keyguard_picker_all_widgets_title">Show all widgets</string>
+
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
 	<string name="volume_adjust_sounds_enable_title">Volume adjust sound</string>
     <!-- Sound settings screen, setting check box summary -->
