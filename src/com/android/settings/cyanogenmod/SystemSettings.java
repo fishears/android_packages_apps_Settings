@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
+import android.preference.CheckBoxPreference;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -42,9 +43,11 @@ public class SystemSettings extends SettingsPreferenceFragment {
     private static final String KEY_HARDWARE_KEYS = "hardware_keys";
     private static final String KEY_NAVIGATION_BAR = "navigation_bar";
     private static final String KEY_LOCK_CLOCK = "lock_clock";
+    private static final String KEY_RECENTS_RAM_BAR = "recents_ram_bar";
 
     private PreferenceScreen mNotificationPulse;
     private PreferenceScreen mBatteryPulse;
+    private CheckBoxPreference mRamBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,7 +94,12 @@ public class SystemSettings extends SettingsPreferenceFragment {
         } catch (RemoteException e) {
             // Do nothing
         }
-
+        
+	mRamBar = (CheckBoxPreference) findPreference(KEY_RECENTS_RAM_BAR);
+        mRamBar.setChecked(Settings.System.getInt(
+                getActivity().getContentResolver(),
+                Settings.System.RECENTS_RAM_BAR, 0) == 1);
+                
         // Act on the above
         if (removeKeys) {
             getPreferenceScreen().removePreference(findPreference(KEY_HARDWARE_KEYS));
@@ -124,6 +132,18 @@ public class SystemSettings extends SettingsPreferenceFragment {
         super.onResume();
         updateLightPulseDescription();
         updateBatteryPulseDescription();
+    }
+    
+    @Override
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
+            Preference preference) {
+        if (preference == mRamBar) {
+            Settings.System.putInt(getActivity().getContentResolver(),
+                    Settings.System.RECENTS_RAM_BAR,
+                    ((CheckBoxPreference) preference).isChecked() ? 1 : 0);
+            return true;
+        }
+        return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
     @Override

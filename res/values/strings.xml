@@ -5133,4 +5133,7 @@
  	<string name="display_category_advanced_title">Advanced</string>
  	<string name="high_end_gfx_title">High end graphic effects</string>
  	<string name="high_end_gfx_summary">Enable graphic effects disabled on lower end devices</string>
+    <!-- Recents Ram Bar -->
+    <string name="ram_bar">Recents RAM Bar</string>
+    <string name="ram_bar_summary">Shows RAM usage in the recents menu</string>
 </resources>
