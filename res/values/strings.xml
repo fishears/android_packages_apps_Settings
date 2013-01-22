@@ -5050,7 +5050,11 @@ rience. Enable at your own discretion.</string>
     <string name="adb_notify_summary">Display a notification when USB debugging is connected</string>
 
     <!-- Launches Dev Tools -->
-    <string name="development_tools_title">Launch Tools</string>
+    <string name="development_tools_title">Launch tools</string>
+
+    <!-- USB Mass Storage -->
+    <string name="usb_mass_storage_title">Mass storage</string>
+    <string name="usb_mass_storage_summary">Enable USB mass storage</string>
 
     <!-- Android debugging over WiFi -->
     <string name="adb_over_network">ADB over network</string>
