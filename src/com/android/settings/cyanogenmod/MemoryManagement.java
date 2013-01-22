@@ -53,19 +53,11 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
 
     private static final String PURGEABLE_ASSETS_DEFAULT = "0";
     
-    public static final String BIGMEM_FILE = "/sys/kernel/bigmem/enable";
+    public static final String RAM_FILE = "/sys/kernel/bigmem/enable";
     
-    public static final String BIGMEM_PREF = "pref_bigmem";
+    public static final String RAM_PREF = "pref_ram_size";
     
-    public static final String BIGMEM_DISABLED = "0";
-    
-    public static final String BIGMEM_ENABLED = "1";
-    
-    public static final String HUGEMEM_PREF = "pref_hugemem";
-    
-    public static final String HUGEMEM_DISABLED = "0";
-    
-    public static final String HUGEMEM_ENABLED = "2";
+    private static final String RAM_DEFAULT = "0";
 
     private ListPreference mzRAM;
 
@@ -73,9 +65,7 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
 
     private CheckBoxPreference mKSMPref;
     
-    private CheckBoxPreference mBigmem;
-    
-    private CheckBoxPreference mHugemem;
+    private ListPreference mRAM;
 
     private int swapAvailable = -1;
 
@@ -92,8 +82,7 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
             mzRAM = (ListPreference) prefSet.findPreference(ZRAM_PREF);
             mPurgeableAssetsPref = (CheckBoxPreference) prefSet.findPreference(PURGEABLE_ASSETS_PREF);
             mKSMPref = (CheckBoxPreference) prefSet.findPreference(KSM_PREF);
-            mBigmem =  (CheckBoxPreference) prefSet.findPreference(BIGMEM_PREF);
-            mHugemem =  (CheckBoxPreference) prefSet.findPreference(HUGEMEM_PREF);
+            mRAM = (ListPreference) prefSet.findPreference(RAM_PREF);
 
             if (isSwapAvailable()) {
                 if (SystemProperties.get(ZRAM_PERSIST_PROP) == "1")
@@ -110,16 +99,11 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 prefSet.removePreference(mKSMPref);
             }
             
-            if (Utils.fileExists(BIGMEM_FILE)) {
-                mBigmem.setChecked(BIGMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
+            if (Utils.fileExists(RAM_FILE)) {
+                mRAM.setValue((Utils.fileReadOneLine(RAM_FILE)));
+                mRAM.setOnPreferenceChangeListener(this);
             } else {
-                prefSet.removePreference(mBigmem);
-            }
-            
-            if (Utils.fileExists(BIGMEM_FILE)) {
-                mHugemem.setChecked(HUGEMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
-            } else {
-                prefSet.removePreference(mHugemem);
+                prefSet.removePreference(mRAM);
             }
 
             String purgeableAssets = SystemProperties.get(PURGEABLE_ASSETS_PERSIST_PROP,
@@ -142,18 +126,6 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
             Utils.fileWriteOneLine(KSM_RUN_FILE, mKSMPref.isChecked() ? "1" : "0");
             return true;
         }
-        
-        if (preference == mBigmem) {
-            Utils.fileWriteOneLine(BIGMEM_FILE, mBigmem.isChecked() ? "1" : "0");
-            mHugemem.setChecked(HUGEMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
-            return true;
-        }
-        
-        if (preference == mHugemem) {
-            Utils.fileWriteOneLine(BIGMEM_FILE, mHugemem.isChecked() ? "2" : "0");
-            mBigmem.setChecked(BIGMEM_ENABLED.equals(Utils.fileReadOneLine(BIGMEM_FILE)));
-            return true;
-        }
 
         return false;
     }
@@ -165,7 +137,14 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 return true;
             }
         }
-
+        if (preference == mRAM) {
+	    if (newValue != null) {
+		if (Utils.fileExists(RAM_FILE)) {
+		    Utils.fileWriteOneLine(RAM_FILE, (String) newValue);
+		    return true;
+		}
+	    }
+	}
         return false;
     }
 

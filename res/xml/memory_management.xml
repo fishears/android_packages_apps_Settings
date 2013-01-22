@@ -37,14 +37,12 @@
         android:title="@string/pref_ksm_title"
         android:summary="@string/pref_ksm_summary" />
 	
-    <CheckBoxPreference
-        android:key="pref_bigmem"
-        android:title="@string/pref_bigmem_title"
-        android:summary="@string/pref_bigmem_summary" />
-	
-    <CheckBoxPreference
-        android:key="pref_hugemem"
-        android:title="@string/pref_hugemem_title"
-        android:summary="@string/pref_hugemem_summary" />
+    <ListPreference
+        android:key="pref_ram_size"
+        android:dialogTitle="@string/pref_ram_title"
+        android:title="@string/pref_ram_title"
+        android:summary="@string/pref_ram_summary"
+        android:entries="@array/pref_ram_size_entries"
+        android:entryValues="@array/pref_ram_size_values" />
 
 </PreferenceScreen>
