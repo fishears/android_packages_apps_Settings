@@ -47,7 +47,7 @@ public class SystemSettings extends SettingsPreferenceFragment {
 
     private PreferenceScreen mNotificationPulse;
     private PreferenceScreen mBatteryPulse;
-    private CheckBoxPreference mRamBar;
+    private Preference mRamBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,10 +95,8 @@ public class SystemSettings extends SettingsPreferenceFragment {
             // Do nothing
         }
         
-	mRamBar = (CheckBoxPreference) findPreference(KEY_RECENTS_RAM_BAR);
-        mRamBar.setChecked(Settings.System.getInt(
-                getActivity().getContentResolver(),
-                Settings.System.RECENTS_RAM_BAR, 0) == 1);
+	mRamBar = findPreference(KEY_RECENTS_RAM_BAR);
+        updateRamBar();
                 
         // Act on the above
         if (removeKeys) {
@@ -126,29 +124,26 @@ public class SystemSettings extends SettingsPreferenceFragment {
             mBatteryPulse.setSummary(getString(R.string.notification_light_disabled));
         }
      }
-
+    private void updateRamBar() {
+        int ramBarMode = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(),
+                Settings.System.RECENTS_RAM_BAR_MODE, 0);
+        if (ramBarMode != 0)
+            mRamBar.setSummary(getResources().getString(R.string.ram_bar_color_enabled));
+        else
+            mRamBar.setSummary(getResources().getString(R.string.ram_bar_color_disabled));
+    }
     @Override
     public void onResume() {
         super.onResume();
+        updateRamBar();
         updateLightPulseDescription();
         updateBatteryPulseDescription();
     }
     
     @Override
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
-            Preference preference) {
-        if (preference == mRamBar) {
-            Settings.System.putInt(getActivity().getContentResolver(),
-                    Settings.System.RECENTS_RAM_BAR,
-                    ((CheckBoxPreference) preference).isChecked() ? 1 : 0);
-            return true;
-        }
-        return super.onPreferenceTreeClick(preferenceScreen, preference);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
+        updateRamBar();
     }
 
     private boolean removePreferenceIfPackageNotInstalled(Preference preference) {
