@@ -55,9 +55,15 @@ public class UsbSettings extends SettingsPreferenceFragment {
     private CheckBoxPreference mMtp;
     private CheckBoxPreference mPtp;
     private CheckBoxPreference mUms;
+    private boolean mUsbAccessoryMode;
 
     private final BroadcastReceiver mStateReceiver = new BroadcastReceiver() {
         public void onReceive(Context content, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(UsbManager.ACTION_USB_STATE)) {
+               mUsbAccessoryMode = intent.getBooleanExtra(UsbManager.USB_FUNCTION_ACCESSORY, false);
+               Log.e(TAG, "UsbAccessoryMode " + mUsbAccessoryMode);
+            }
             updateToggles(mUsbManager.getDefaultFunction());
         }
     };
@@ -125,6 +131,18 @@ public class UsbSettings extends SettingsPreferenceFragment {
             mPtp.setChecked(false);
             mUms.setChecked(false);
         }
+
+        if (!mUsbAccessoryMode) {
+            //Enable MTP and PTP switch while USB is not in Accessory Mode, otherwise disable it
+            Log.e(TAG, "USB Normal Mode");
+            mMtp.setEnabled(true);
+            mPtp.setEnabled(true);
+        } else {
+            Log.e(TAG, "USB Accessory Mode");
+            mMtp.setEnabled(false);
+            mPtp.setEnabled(false);
+        }
+
     }
 
     @Override
@@ -145,15 +163,15 @@ public class UsbSettings extends SettingsPreferenceFragment {
             }
         }
         if (preference == mMtp) {
-            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 0);
+            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 0 );
             mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MTP, true);
             updateToggles(UsbManager.USB_FUNCTION_MTP);
         } else if (preference == mPtp) {
-            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 0);
+            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 0 );
             mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_PTP, true);
             updateToggles(UsbManager.USB_FUNCTION_PTP);
         } else if (preference == mUms) {
-            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 1);
+            Settings.Secure.putInt(getContentResolver(), Settings.Secure.USB_MASS_STORAGE_ENABLED, 1 );
             mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MASS_STORAGE, true);
             updateToggles(UsbManager.USB_FUNCTION_MASS_STORAGE);
         }
