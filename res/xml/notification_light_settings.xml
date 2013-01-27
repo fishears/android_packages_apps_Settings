@@ -28,7 +28,7 @@
         <com.android.settings.notificationlight.ApplicationLightPreference
             android:key="default"
             android:title="@string/notification_light_default_value"
-            android:persistent="false" />
+            android:persistent="true" />
 
         <CheckBoxPreference
             android:key="custom_enabled"
