@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2007 The Android Open Source Project
      Copyright (C) 2013 The CyanogenMod Project
 
@@ -4731,8 +4731,7 @@
 
     <!-- Display : Rotation  -->
     <string name="display_rotation_title">Rotation</string>
-    <string name="display_rotation_enabled">Enabled.</string>
-    <string name="display_rotation_disabled">Disabled.</string>
+    <string name="display_rotation_disabled">Disabled</string>
     <string name="display_rotation_unit">degrees</string>
     <string name="display_lockscreen_rotation_title">Include lock screen</string>
     <string name="display_rotation_category_title">Rotation modes</string>
@@ -5036,7 +5035,7 @@ rience. Enable at your own discretion.</string>
     <string name="adb_notify_summary">Display a notification when USB debugging is connected</string>
 
     <!-- Launches Dev Tools -->
-    <string name="development_tools_title">Launch tools</string>
+    <string name="development_tools_title">Launch Tools</string>
 
     <!-- USB Mass Storage -->
     <string name="usb_mass_storage_title">Mass storage</string>
@@ -5147,6 +5146,16 @@ rience. Enable at your own discretion.</string>
     <string name="lockscreen_maximize_widgets_summary">Show widgets maximized and the unlock minimized when the screen is turned on</string>
 
 	<string name="keyguard_picker_all_widgets_title">Show all widgets</string>
+
+    <!-- Custom lock screen background -->
+    <string name="lockscreen_custom_background_title">Background</string>
+    <string name="lockscreen_custom_background_dialog_title">Choose color</string>
+    <string name="lockscreen_background_result_successful">Background changed successfully</string>
+    <string name="lockscreen_background_result_not_successful">Background could not be changed</string>
+    <string name="lockscreen_background_color_fill">Color fill</string>
+    <string name="lockscreen_background_custom_image">Custom image</string>
+    <string name="lockscreen_background_default_wallpaper">Default wallpaper</string>
+
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
 	<string name="volume_adjust_sounds_enable_title">Volume adjust sound</string>
     <!-- Sound settings screen, setting check box summary -->
