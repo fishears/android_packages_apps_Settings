@@ -43,10 +43,12 @@ public class SystemSettings extends SettingsPreferenceFragment {
     private static final String KEY_HARDWARE_KEYS = "hardware_keys";
     private static final String KEY_NAVIGATION_BAR = "navigation_bar";
     private static final String KEY_LOCK_CLOCK = "lock_clock";
+    private static final String KEY_DUAL_PANE = "dual_pane";
     private static final String KEY_RECENTS_RAM_BAR = "recents_ram_bar";
 
     private PreferenceScreen mNotificationPulse;
     private PreferenceScreen mBatteryPulse;
+    private CheckBoxPreference mDualPane;
     private Preference mRamBar;
 
     @Override
@@ -94,7 +96,12 @@ public class SystemSettings extends SettingsPreferenceFragment {
         } catch (RemoteException e) {
             // Do nothing
         }
-        
+        mDualPane = (CheckBoxPreference) findPreference(KEY_DUAL_PANE);
+        boolean preferDualPane = getResources().getBoolean(
+                com.android.internal.R.bool.preferences_prefer_dual_pane);
+        boolean dualPaneMode = Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.DUAL_PANE_PREFS, (preferDualPane ? 1 : 0)) == 1;
+        mDualPane.setChecked(dualPaneMode);
 	mRamBar = findPreference(KEY_RECENTS_RAM_BAR);
         updateRamBar();
                 
@@ -163,4 +170,16 @@ public class SystemSettings extends SettingsPreferenceFragment {
         }
         return false;
     }
+    
+    @Override
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
+            Preference preference) {
+        if (preference == mDualPane) {
+            Settings.System.putInt(getActivity().getContentResolver(),
+                    Settings.System.DUAL_PANE_PREFS,
+                    ((CheckBoxPreference) preference).isChecked() ? 1 : 0);
+            return true;
+        }
+        return super.onPreferenceTreeClick(preferenceScreen, preference);
+     }
 }

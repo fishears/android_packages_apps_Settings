@@ -5181,6 +5181,11 @@ rience. Enable at your own discretion.</string>
  	<string name="display_category_advanced_title">Advanced</string>
  	<string name="high_end_gfx_title">High-end graphic effects</string>
  	<string name="high_end_gfx_summary">Enable graphic effects disabled on lower-end devices (reboot required)</string>
+	
+    <!-- Dual Pane -->
+    <string name="dual_pane">Dual panel mode</string>
+    <string name="dual_pane_summary">Enable/disable dual panel mode (requires reboot)</string>
+	
     <!-- Recents Ram Bar -->
     <string name="ram_bar">Recents RAM bar</string>
     <string name="ram_bar_note_title">Note</string>
