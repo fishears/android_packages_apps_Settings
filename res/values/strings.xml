@@ -5184,7 +5184,7 @@ rience. Enable at your own discretion.</string>
 	
     <!-- Dual Pane -->
     <string name="dual_pane">Dual panel mode</string>
-    <string name="dual_pane_summary">Enable/disable dual panel mode (requires reboot)</string>
+    <string name="dual_pane_summary">Enable/disable dual panel mode</string>
 	
     <!-- Recents Ram Bar -->
     <string name="ram_bar">Recents RAM bar</string>
