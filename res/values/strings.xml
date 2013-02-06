@@ -5180,7 +5180,7 @@ rience. Enable at your own discretion.</string>
     <!-- High End Gfx Effects -->
  	<string name="display_category_advanced_title">Advanced</string>
  	<string name="high_end_gfx_title">High-end graphic effects</string>
- 	<string name="high_end_gfx_summary">Enable graphic effects disabled on lower-end devices (reboot required)</string>
+ 	<string name="high_end_gfx_summary">Enable graphic effects disabled on lower-end devices</string>
 	
     <!-- Dual Pane -->
     <string name="dual_pane">Dual panel mode</string>
