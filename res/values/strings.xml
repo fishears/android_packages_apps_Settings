@@ -5172,6 +5172,11 @@ rience. Enable at your own discretion.</string>
     <string name="auto_brightness_level_dialog_title">Level configuration</string>
     <string name="auto_brightness_ambient_light_level">Ambient light brightness</string>
     <string name="auto_brightness_backlight_level">Display backlight brightness</string>
+
+    <!-- Safe headset volume restore checkbox -->
+    <string name="safe_headset_volume_title">Safe headset volume</string>
+    <string name="safe_headset_volume_summary">Prevent loud volume levels when headset is first plugged in</string>
+
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
 	<string name="volume_adjust_sounds_enable_title">Volume adjust sound</string>
     <!-- Sound settings screen, setting check box summary -->
