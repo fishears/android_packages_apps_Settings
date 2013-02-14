@@ -11,11 +11,17 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -92,6 +98,7 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         mConfigList = (ListView) view.findViewById(android.R.id.list);
         mAdapter = new SettingRowAdapter(context, new ArrayList<SettingRow>());
         mConfigList.setAdapter(mAdapter);
+        registerForContextMenu(mConfigList);
     }
 
     @Override
@@ -107,7 +114,7 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         neutralButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateSettings(true);
+                showResetConfirmation();
             }
         });
     }
@@ -116,6 +123,41 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
     protected void onStop() {
         super.onStop();
         mSensorManager.unregisterListener(mLightSensorListener, mLightSensor);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+        menu.setHeaderTitle(R.string.auto_brightness_level_options);
+
+        menu.add(Menu.NONE, Menu.FIRST, 0, R.string.auto_brightness_menu_edit_lux)
+                .setEnabled(!mAdapter.isLastItem(info.position));
+        menu.add(Menu.NONE, Menu.FIRST + 1, 1, R.string.auto_brightness_menu_split)
+                .setEnabled(mAdapter.canSplitRow(info.position));
+        menu.add(Menu.NONE, Menu.FIRST + 2, 2, R.string.auto_brightness_menu_remove)
+                .setEnabled(mAdapter.getCount() > 1);
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int position = info.position;
+
+        switch (item.getItemId() - Menu.FIRST) {
+            case 0:
+                showLuxSetup(position);
+                return true;
+            case 1:
+                showSplitDialog(position);
+                break;
+            case 2:
+                mAdapter.removeRow(position);
+                return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -152,76 +194,97 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         mAdapter.initFromSettings(lux, values);
     }
 
-    private void showSettings(final int position) {
+    private void showLuxSetup(final int position) {
         final SettingRow row = mAdapter.getItem(position);
-        final View v = getLayoutInflater().inflate(R.layout.auto_brightness_row_config, null);
-        final EditText luxInput = (EditText) v.findViewById(R.id.ambient);
-        final SeekBar backlightBar = (SeekBar) v.findViewById(R.id.backlight);
-        final TextView backlightText = (TextView) v.findViewById(R.id.backlight_value);
+        final View v = getLayoutInflater().inflate(R.layout.auto_brightness_lux_config, null);
+        final EditText startLux = (EditText) v.findViewById(R.id.start_lux);
+        final EditText endLux = (EditText) v.findViewById(R.id.end_lux);
 
         final AlertDialog d = new AlertDialog.Builder(getContext())
-            .setTitle(R.string.auto_brightness_level_dialog_title)
+            .setTitle(R.string.auto_brightness_lux_dialog_title)
             .setCancelable(true)
             .setView(v)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface d, int which) {
                     try {
-                        int newLux = Integer.valueOf(luxInput.getText().toString());
-                        int newBacklight = (backlightBar.getProgress() + 50) / 100;
-                        mAdapter.updateRow(position, newLux, newBacklight);
+                        int newLux = Integer.valueOf(endLux.getText().toString());
+                        mAdapter.setLuxToForRow(position, newLux);
                     } catch (NumberFormatException e) {
                         //ignored
                     }
                 }
             })
-            .setNeutralButton(R.string.auto_brightness_remove_button,
-                    new DialogInterface.OnClickListener() {
+            .setNegativeButton(R.string.cancel, null)
+            .create();
+
+        startLux.setText(String.valueOf(row.luxFrom));
+        endLux.setText(String.valueOf(row.luxTo));
+        d.show();
+    }
+
+    private void showSplitDialog(final int position) {
+        final SettingRow row = mAdapter.getItem(position);
+        final View v = getLayoutInflater().inflate(R.layout.auto_brightness_split_dialog, null);
+        final TextView label = (TextView) v.findViewById(R.id.split_label);
+        final EditText value = (EditText) v.findViewById(R.id.split_position);
+
+        final AlertDialog d = new AlertDialog.Builder(getContext())
+            .setTitle(R.string.auto_brightness_lux_dialog_title)
+            .setCancelable(true)
+            .setView(v)
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface d, int which) {
-                    mAdapter.removeRow(position);
+                    int splitLux = Integer.valueOf(value.getText().toString());
+                    mAdapter.splitRow(position, splitLux);
                 }
             })
             .setNegativeButton(R.string.cancel, null)
             .create();
 
-        backlightBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            private boolean mIsDragging = false;
-
-            private void updateBrightness(float brightness) {
-                final Window window = d.getWindow();
-                final WindowManager.LayoutParams params = window.getAttributes();
-                params.screenBrightness = brightness;
-                window.setAttributes(params);
-            }
-
+        label.setText(getContext().getString(R.string.auto_brightness_split_lux_format,
+                row.luxFrom + 1, row.luxTo - 1));
+        value.setText(String.valueOf(row.luxFrom + 1));
+        value.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (mIsDragging) {
-                    final float brightness = (float) progress / seekBar.getMax();
-                    updateBrightness(brightness);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                boolean ok = false;
+                try {
+                    int newLux = Integer.valueOf(s.toString());
+                    ok = newLux > row.luxFrom && newLux < row.luxTo;
+                } catch (NumberFormatException e) {
+                    //ignored, ok is false anyway
                 }
-
-                final int percent = Math.round((float) progress / PowerManager.BRIGHTNESS_ON);
-                backlightText.setText(getContext().getString(
-                        R.string.auto_brightness_brightness_format, percent));
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                final float brightness = (float) seekBar.getProgress() / seekBar.getMax();
-                updateBrightness(brightness);
-                mIsDragging = true;
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                updateBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE);
-                mIsDragging = false;
+                Button okButton = d.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (okButton != null) {
+                    okButton.setEnabled(ok);
+                }
             }
         });
 
-        luxInput.setText(String.valueOf(row.luxFrom));
-        luxInput.setEnabled(position != 0);
-        backlightBar.setProgress(row.backlight * 100);
+        d.show();
+    }
+
+    private void showResetConfirmation() {
+        final AlertDialog d = new AlertDialog.Builder(getContext())
+            .setTitle(R.string.auto_brightness_reset_dialog_title)
+            .setCancelable(true)
+            .setMessage(R.string.auto_brightness_reset_confirmation)
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface d, int which) {
+                    updateSettings(true);
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .create();
 
         d.show();
     }
@@ -278,19 +341,22 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
     }
 
     private class SettingRowAdapter extends ArrayAdapter<SettingRow> {
-        private View mAddView;
-
         public SettingRowAdapter(Context context, ArrayList<SettingRow> rows) {
             super(context, 0, rows);
             setNotifyOnChange(false);
         }
 
-        private boolean isAddItem(int position) {
+        private boolean isLastItem(int position) {
             return position == getCount() - 1;
         }
 
-        private boolean isLastItem(int position) {
-            return position == super.getCount() - 1;
+        public boolean canSplitRow(int position) {
+            if (isLastItem(position)) {
+                return false;
+            }
+
+            SettingRow row = getItem(position);
+            return row.luxTo > (row.luxFrom + 1);
         }
 
         public void initFromSettings(int[] lux, int[] values) {
@@ -306,7 +372,7 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         }
 
         public int[] getLuxValues() {
-            int count = super.getCount();
+            int count = getCount();
             int[] lux = new int[count - 1];
 
             for (int i = 0; i < count - 1; i++) {
@@ -317,7 +383,7 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         }
 
         public int[] getBacklightValues() {
-            int count = super.getCount();
+            int count = getCount();
             int[] values = new int[count];
 
             for (int i = 0; i < count; i++) {
@@ -326,15 +392,31 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
             return values;
         }
 
-        public void addRow() {
-            SettingRow lastRow = mAdapter.getItem(super.getCount() - 1);
-            SettingRow newRow = new SettingRow(0, 0, lastRow.backlight);
-            add(newRow);
+        public void splitRow(int position, int splitLux) {
+            if (!canSplitRow(position)) {
+                return;
+            }
+
+            ArrayList<SettingRow> rows = new ArrayList<SettingRow>();
+            for (int i = 0; i <= position; i++) {
+                rows.add(getItem(i));
+            }
+
+            SettingRow lastRow = getItem(position);
+            SettingRow nextRow = getItem(position + 1);
+            rows.add(new SettingRow(splitLux, nextRow.luxFrom, lastRow.backlight));
+
+            for (int i = position + 1; i < getCount(); i++) {
+                rows.add(getItem(i));
+            }
+
+            clear();
+            addAll(rows);
             sanitizeValuesAndNotify();
         }
 
         public void removeRow(int position) {
-            if (super.getCount() <= 1) {
+            if (getCount() <= 1) {
                 return;
             }
 
@@ -342,23 +424,19 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
             sanitizeValuesAndNotify();
         }
 
-        public void updateRow(final int position, int newLuxFrom, int newBacklight) {
+        public void setLuxToForRow(final int position, int newLuxTo) {
             final SettingRow row = getItem(position);
 
-            if (row.backlight == newBacklight && (position == 0 || row.luxFrom == newLuxFrom)) {
+            if (isLastItem(position) || row.luxTo == newLuxTo) {
                 return;
             }
 
-            row.backlight = newBacklight;
-            if (position != 0) {
-                row.luxFrom = newLuxFrom;
-            }
-
+            row.luxTo = newLuxTo;
             sanitizeValuesAndNotify();
         }
 
         public void sanitizeValuesAndNotify() {
-            final int count = super.getCount();
+            final int count = getCount();
 
             getItem(0).luxFrom = 0;
             for (int i = 1; i < count; i++) {
@@ -376,61 +454,68 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
         }
 
         @Override
-        public int getCount() {
-            return super.getCount() + 1;
-        }
-
-        @Override
-        public SettingRow getItem(int position) {
-            if (isAddItem(position)) {
-                return null;
-            }
-            return super.getItem(position);
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return isAddItem(position) ? 1 : 0;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 2;
-        }
-
-        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            if (isAddItem(position)) {
-                if (mAddView == null) {
-                    mAddView = getLayoutInflater().inflate(
-                            R.layout.auto_brightness_list_item_add, parent, false);
-                    mAddView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            addRow();
-                        }
-                    });
-                }
-                return mAddView;
-            }
-
-            Holder holder;
+            final Holder holder;
 
             if (convertView == null) {
                 convertView = getLayoutInflater().inflate(
                         R.layout.auto_brightness_list_item, parent, false);
                 holder = new Holder();
                 holder.lux = (TextView) convertView.findViewById(R.id.lux);
-                holder.backlight = (TextView) convertView.findViewById(R.id.backlight);
-                holder.settingsButton = convertView.findViewById(R.id.settings);
-                holder.settingsButton.setOnClickListener(new View.OnClickListener() {
+                holder.backlight = (SeekBar) convertView.findViewById(R.id.backlight);
+                holder.percent = (TextView) convertView.findViewById(R.id.backlight_percent);
+                convertView.setTag(holder);
+
+                holder.backlight.setMax(100 * PowerManager.BRIGHTNESS_ON);
+                holder.backlight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    private boolean mIsDragging = false;
+
+                    private void updateBrightness(float brightness) {
+                        final Window window = getWindow();
+                        final WindowManager.LayoutParams params = window.getAttributes();
+                        params.screenBrightness = brightness;
+                        window.setAttributes(params);
+                    }
+
                     @Override
-                    public void onClick(View v) {
-                        int item = (Integer) v.getTag();
-                        showSettings(item);
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        int pos = (Integer) seekBar.getTag();
+                        if (fromUser) {
+                            int minValue = (pos == 0) ? 0 : getItem(pos - 1).backlight * 100;
+                            int maxValue = isLastItem(pos)
+                                    ? seekBar.getMax() : getItem(pos + 1).backlight * 100;
+
+                            if (progress < minValue) {
+                                seekBar.setProgress(minValue);
+                                return;
+                            } else if (progress > maxValue) {
+                                seekBar.setProgress(maxValue);
+                                return;
+                            }
+
+                            getItem(pos).backlight = (progress + 50) / 100;
+                            mIsDefault = false;
+                        }
+
+                        if (mIsDragging) {
+                            final float brightness = (float) progress / seekBar.getMax();
+                            updateBrightness(brightness);
+                        }
+
+                        holder.updatePercent();
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        final float brightness = (float) seekBar.getProgress() / seekBar.getMax();
+                        updateBrightness(brightness);
+                        mIsDragging = true;
+                    }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        updateBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE);
+                        mIsDragging = false;
                     }
                 });
-                convertView.setTag(holder);
             } else {
                 holder = (Holder) convertView.getTag();
             }
@@ -441,19 +526,23 @@ public class AutoBrightnessCustomizeDialog extends AlertDialog
             holder.lux.setText(getContext().getString(R.string.auto_brightness_level_format,
                     String.valueOf(row.luxFrom), to));
 
-            int backlight = Math.round((float) row.backlight * 100F / PowerManager.BRIGHTNESS_ON);
-            holder.backlight.setText(getContext().getString(R.string.auto_brightness_brightness_format,
-                    String.valueOf(backlight)));
-
-            holder.settingsButton.setTag(Integer.valueOf(position));
+            holder.backlight.setTag(position);
+            holder.backlight.setProgress(100 * row.backlight);
+            holder.updatePercent();
 
             return convertView;
         }
 
         private class Holder {
             TextView lux;
-            TextView backlight;
-            View settingsButton;
+            SeekBar backlight;
+            TextView percent;
+
+            public void updatePercent() {
+                int percentValue = Math.round((float) backlight.getProgress() * 100F / backlight.getMax());
+                percent.setText(getContext().getString(
+                        R.string.auto_brightness_brightness_format, percentValue));
+            }
         };
     };
 }
