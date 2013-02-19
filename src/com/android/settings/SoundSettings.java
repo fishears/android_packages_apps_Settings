@@ -17,6 +17,7 @@
 package com.android.settings;
 
 import com.android.settings.bluetooth.DockEventReceiver;
+import com.android.settings.Utils;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -224,7 +225,6 @@ public class SoundSettings extends SettingsPreferenceFragment implements
         mHapticFeedback.setChecked(Settings.System.getInt(resolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 1) != 0);
         mVolumeAdjustSounds = (CheckBoxPreference) findPreference(KEY_VOLUME_ADJUST_SOUNDS);
-        mVolumeAdjustSounds.setPersistent(false);
         mVolumeAdjustSounds.setChecked(Settings.System.getInt(resolver,
                 Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED, 1) != 0);
         mLockSounds = (CheckBoxPreference) findPreference(KEY_LOCK_SOUNDS);
@@ -233,12 +233,19 @@ public class SoundSettings extends SettingsPreferenceFragment implements
                 Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) != 0);
 
         mVolBtnMusicCtrl = (CheckBoxPreference) findPreference(KEY_VOLBTN_MUSIC_CTRL);
-        mVolBtnMusicCtrl.setChecked(Settings.System.getInt(resolver,
-                Settings.System.VOLBTN_MUSIC_CONTROLS, 1) != 0);
+        if (mVolBtnMusicCtrl != null) {
+            if (!Utils.hasVolumeRocker(getActivity())) {
+                getPreferenceScreen().removePreference(mVolBtnMusicCtrl);
+            } else {
+                mVolBtnMusicCtrl.setChecked(Settings.System.getInt(resolver,
+                        Settings.System.VOLBTN_MUSIC_CONTROLS, 1) != 0);
+            }
+        }
 
         mHeadsetConnectPlayer = (CheckBoxPreference) findPreference(KEY_HEADSET_CONNECT_PLAYER);
         mHeadsetConnectPlayer.setChecked(Settings.System.getInt(resolver,
                 Settings.System.HEADSET_CONNECT_PLAYER, 0) != 0);
+
         mConvertSoundToVibration = (CheckBoxPreference) findPreference(KEY_CONVERT_SOUND_TO_VIBRATE);
 
         mConvertSoundToVibration.setPersistent(false);
@@ -419,12 +426,13 @@ public class SoundSettings extends SettingsPreferenceFragment implements
             Settings.System.putInt(getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED,
                     mHapticFeedback.isChecked() ? 1 : 0);
         } else if (preference == mVolumeAdjustSounds) {
-            Settings.System.putInt(getContentResolver(), Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED ,
+            Settings.System.putInt(getContentResolver(), Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED,
                     mVolumeAdjustSounds.isChecked() ? 1 : 0);
 
         } else if (preference == mLockSounds) {
             Settings.System.putInt(getContentResolver(), Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
                     mLockSounds.isChecked() ? 1 : 0);
+
         } else if (preference == mConvertSoundToVibration) {
             Settings.System.putInt(getContentResolver(), Settings.System.NOTIFICATION_CONVERT_SOUND_TO_VIBRATION,
                     mConvertSoundToVibration.isChecked() ? 1 : 0);
