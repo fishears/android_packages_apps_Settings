@@ -1637,6 +1637,7 @@
     <string-array name="entries_prox_delay_explain">
         <item>Remove</item>
         <item>0</item>
+	<item>25</item>
         <item>50</item>
         <item>75</item>
         <item>125</item>
@@ -1660,6 +1661,7 @@
     <string-array name="entries_prox_delay">
         <item>disable</item>
         <item>0</item>
+	<item>25</item>
         <item>50</item>
         <item>75</item>
         <item>125</item>
