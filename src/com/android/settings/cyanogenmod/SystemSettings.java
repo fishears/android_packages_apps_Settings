@@ -21,6 +21,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 import android.preference.CheckBoxPreference;
@@ -41,10 +42,17 @@ public class SystemSettings extends SettingsPreferenceFragment {
     private static final String KEY_BATTERY_LIGHT = "battery_light";
     private static final String KEY_HARDWARE_KEYS = "hardware_keys";
     private static final String KEY_NAVIGATION_BAR = "navigation_bar";
+    private static final String KEY_NAVIGATION_RING = "navigation_ring";
+    private static final String KEY_NAVIGATION_BAR_CATEGORY = "navigation_bar_category";
     private static final String KEY_LOCK_CLOCK = "lock_clock";
+    private static final String KEY_STATUS_BAR = "status_bar";
     private static final String KEY_DUAL_PANE = "dual_pane";
     private static final String KEY_RECENTS_RAM_BAR = "recents_ram_bar";
+	private static final String KEY_QUICK_SETTINGS = "quick_settings_panel";
+    private static final String KEY_NOTIFICATION_DRAWER = "notification_drawer";
+    private static final String KEY_POWER_MENU = "power_menu";
 
+    private boolean mIsPrimary;
     private PreferenceScreen mBatteryPulse;
     private CheckBoxPreference mDualPane;
     private Preference mRamBar;
@@ -54,36 +62,61 @@ public class SystemSettings extends SettingsPreferenceFragment {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.system_settings);
+        PreferenceScreen prefScreen = getPreferenceScreen();
 
-        // Dont display the lock clock preference if its not installed
-        removePreferenceIfPackageNotInstalled(findPreference(KEY_LOCK_CLOCK));
-
-        // Battery lights
-        mBatteryPulse = (PreferenceScreen) findPreference(KEY_BATTERY_LIGHT);
-        if (mBatteryPulse != null) {
-            if (getResources().getBoolean(
-                    com.android.internal.R.bool.config_intrusiveBatteryLed) == false) {
-                getPreferenceScreen().removePreference(mBatteryPulse);
-            } else {
-                updateBatteryPulseDescription();
+        // Determine which user is logged in
+        mIsPrimary = UserHandle.myUserId() == UserHandle.USER_OWNER;
+        if (mIsPrimary) {
+            // Primary user only preferences
+            // Battery lights
+            mBatteryPulse = (PreferenceScreen) findPreference(KEY_BATTERY_LIGHT);
+            if (mBatteryPulse != null) {
+                if (getResources().getBoolean(
+                        com.android.internal.R.bool.config_intrusiveBatteryLed) == false) {
+                    prefScreen.removePreference(mBatteryPulse);
+                } else {
+                    updateBatteryPulseDescription();
+                }
             }
+
+            // Only show the hardware keys config on a device that does not have a navbar
+            // and the navigation bar config on phones that has a navigation bar
+            boolean removeKeys = false;
+            boolean removeNavbar = false;
+            IWindowManager windowManager = IWindowManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WINDOW_SERVICE));
+            try {
+                if (windowManager.hasNavigationBar()) {
+                    removeKeys = true;
+                } else {
+                    removeNavbar = true;
+                }
+            } catch (RemoteException e) {
+                // Do nothing
+            }
+
+            // Act on the above
+            if (removeKeys) {
+                prefScreen.removePreference(findPreference(KEY_HARDWARE_KEYS));
+            }
+            if (removeNavbar) {
+                prefScreen.removePreference(findPreference(KEY_NAVIGATION_BAR));
+                prefScreen.removePreference(findPreference(KEY_NAVIGATION_RING));
+                prefScreen.removePreference(findPreference(KEY_NAVIGATION_BAR_CATEGORY));
+            }
+        } else {
+            // Secondary user is logged in, remove all primary user specific preferences
+            prefScreen.removePreference(findPreference(KEY_BATTERY_LIGHT));
+            prefScreen.removePreference(findPreference(KEY_HARDWARE_KEYS));
+            prefScreen.removePreference(findPreference(KEY_NAVIGATION_BAR));
+            prefScreen.removePreference(findPreference(KEY_NAVIGATION_RING));
+            prefScreen.removePreference(findPreference(KEY_NAVIGATION_BAR_CATEGORY));
+            prefScreen.removePreference(findPreference(KEY_STATUS_BAR));
+            prefScreen.removePreference(findPreference(KEY_QUICK_SETTINGS));
+            prefScreen.removePreference(findPreference(KEY_POWER_MENU));
+            prefScreen.removePreference(findPreference(KEY_NOTIFICATION_DRAWER));
         }
 
-        // Only show the hardware keys config on a device that does not have a navbar
-        // Only show the navigation bar config on phones that has a navigation bar
-        boolean removeKeys = false;
-        boolean removeNavbar = false;
-        IWindowManager windowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-        try {
-            if (windowManager.hasNavigationBar()) {
-                removeKeys = true;
-            } else {
-                removeNavbar = true;
-            }
-        } catch (RemoteException e) {
-            // Do nothing
-        }
         mDualPane = (CheckBoxPreference) findPreference(KEY_DUAL_PANE);
         boolean preferDualPane = getResources().getBoolean(
                 com.android.internal.R.bool.preferences_prefer_dual_pane);
@@ -92,14 +125,7 @@ public class SystemSettings extends SettingsPreferenceFragment {
         mDualPane.setChecked(dualPaneMode);
 	mRamBar = findPreference(KEY_RECENTS_RAM_BAR);
         updateRamBar();
-                
-        // Act on the above
-        if (removeKeys) {
-            getPreferenceScreen().removePreference(findPreference(KEY_HARDWARE_KEYS));
-        }
-        if (removeNavbar) {
-            getPreferenceScreen().removePreference(findPreference(KEY_NAVIGATION_BAR));
-        }
+
     }
 
     private void updateBatteryPulseDescription() {
