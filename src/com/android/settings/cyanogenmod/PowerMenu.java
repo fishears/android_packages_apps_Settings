@@ -18,7 +18,6 @@ package com.android.settings.cyanogenmod;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.preference.CheckBoxPreference;
@@ -27,8 +26,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
-import android.util.Log;
-import android.view.WindowManagerGlobal;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
@@ -40,7 +37,6 @@ public class PowerMenu extends SettingsPreferenceFragment implements
     private static final String KEY_REBOOT = "power_menu_reboot";
     private static final String KEY_SCREENSHOT = "power_menu_screenshot";
     private static final String KEY_EXPANDED_DESKTOP = "power_menu_expanded_desktop";
-    private static final String KEY_EXPANDED_DESKTOP_NO_NAVBAR = "power_menu_expanded_desktop_no_navbar";
     private static final String KEY_PROFILES = "power_menu_profiles";
     private static final String KEY_AIRPLANE = "power_menu_airplane";
     private static final String KEY_USER = "power_menu_user";
@@ -48,8 +44,7 @@ public class PowerMenu extends SettingsPreferenceFragment implements
 
     private CheckBoxPreference mRebootPref;
     private CheckBoxPreference mScreenshotPref;
-    private ListPreference mExpandedDesktopPref;
-    private CheckBoxPreference mExpandedDesktopNoNavbarPref;
+    ListPreference mExpandedDesktopPref;
     private CheckBoxPreference mProfilesPref;
     private CheckBoxPreference mAirplanePref;
     private CheckBoxPreference mUserPref;
@@ -71,25 +66,10 @@ public class PowerMenu extends SettingsPreferenceFragment implements
 
         PreferenceScreen prefSet = getPreferenceScreen();
         mExpandedDesktopPref = (ListPreference) prefSet.findPreference(KEY_EXPANDED_DESKTOP);
-        mExpandedDesktopNoNavbarPref = (CheckBoxPreference) findPreference(KEY_EXPANDED_DESKTOP_NO_NAVBAR);
+        mExpandedDesktopPref.setOnPreferenceChangeListener(this);
         int expandedDesktopValue = Settings.System.getInt(getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0);
-
-        // Hide no-op "Status bar visible" mode on devices without navbar
-        try {
-            if (WindowManagerGlobal.getWindowManagerService().hasNavigationBar()) {
-                mExpandedDesktopPref.setOnPreferenceChangeListener(this);
-                mExpandedDesktopPref.setValue(String.valueOf(expandedDesktopValue));
-                updateExpandedDesktop(expandedDesktopValue);
-
-                prefSet.removePreference(mExpandedDesktopNoNavbarPref);
-            } else {
-                mExpandedDesktopNoNavbarPref.setChecked(expandedDesktopValue > 0);
-
-                prefSet.removePreference(mExpandedDesktopPref);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error getting navigation bar status");
-        }
+        mExpandedDesktopPref.setValue(String.valueOf(expandedDesktopValue));
+        updateExpandedDesktopSummary(expandedDesktopValue);
 
         mProfilesPref = (CheckBoxPreference) findPreference(KEY_PROFILES);
         mProfilesPref.setChecked((Settings.System.getInt(getContentResolver(),
@@ -122,7 +102,9 @@ public class PowerMenu extends SettingsPreferenceFragment implements
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mExpandedDesktopPref) {
             int expandedDesktopValue = Integer.valueOf((String) newValue);
-            updateExpandedDesktop(expandedDesktopValue);
+            Settings.System.putInt(getContentResolver(),
+                    Settings.System.EXPANDED_DESKTOP_STYLE, expandedDesktopValue);
+            updateExpandedDesktopSummary(expandedDesktopValue);
             return true;
         }
         return false;
@@ -137,9 +119,6 @@ public class PowerMenu extends SettingsPreferenceFragment implements
             Settings.System.putInt(getContentResolver(),
                     Settings.System.POWER_MENU_SCREENSHOT_ENABLED,
                     value ? 1 : 0);
-        } else if (preference == mExpandedDesktopNoNavbarPref) {
-            value = mExpandedDesktopNoNavbarPref.isChecked();
-            updateExpandedDesktop(value ? 2 : 0);
         } else if (preference == mRebootPref) {
             value = mRebootPref.isChecked();
             Settings.System.putInt(getContentResolver(),
@@ -172,33 +151,25 @@ public class PowerMenu extends SettingsPreferenceFragment implements
         return true;
     }
 
-    private void updateExpandedDesktop(int value) {
+    private void updateExpandedDesktopSummary(int value) {
         Resources res = getResources();
-        int summary = -1;
-
-        Settings.System.putInt(getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STYLE, value);
 
         if (value == 0) {
             // Expanded desktop deactivated
             Settings.System.putInt(getContentResolver(),
                     Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 0);
-            summary = R.string.expanded_desktop_disabled;
+            mExpandedDesktopPref.setSummary(res.getString(R.string.expanded_desktop_disabled));
             // Disable expanded desktop if enabled
             Settings.System.putInt(getContentResolver(),
                     Settings.System.EXPANDED_DESKTOP_STATE, 0);
         } else if (value == 1) {
             Settings.System.putInt(getContentResolver(),
                     Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1);
-            summary = R.string.expanded_desktop_status_bar;
+            mExpandedDesktopPref.setSummary(res.getString(R.string.expanded_desktop_status_bar));
         } else if (value == 2) {
             Settings.System.putInt(getContentResolver(),
                     Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1);
-            summary = R.string.expanded_desktop_no_status_bar;
-        }
-
-        if (mExpandedDesktopPref != null && summary != -1) {
-            mExpandedDesktopPref.setSummary(res.getString(summary));
+            mExpandedDesktopPref.setSummary(res.getString(R.string.expanded_desktop_no_status_bar));
         }
     }
 }
