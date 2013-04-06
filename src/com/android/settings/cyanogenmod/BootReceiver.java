@@ -56,7 +56,7 @@ public class BootReceiver extends BroadcastReceiver {
             SystemProperties.set(IOSCHED_SETTINGS_PROP, "false");
         }
 
-        if (Utils.fileExists(MemoryManagement.KSM_RUN_FILE)) {
+        if (Utils.fileExists(UKSM.KSM_RUN_FILE)) {
             if (SystemProperties.getBoolean(KSM_SETTINGS_PROP, false) == false
                     && intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
                 SystemProperties.set(KSM_SETTINGS_PROP, "true");
@@ -145,9 +145,9 @@ public class BootReceiver extends BroadcastReceiver {
     private void configureKSM(Context ctx) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 
-        boolean ksm = prefs.getBoolean(MemoryManagement.KSM_PREF, false);
+        boolean ksm = prefs.getBoolean(UKSM.KSM_PREF, false);
 
-        Utils.fileWriteOneLine(MemoryManagement.KSM_RUN_FILE, ksm ? "1" : "0");
+        Utils.fileWriteOneLine(UKSM.KSM_RUN_FILE, ksm ? "1" : "0");
         Log.d(TAG, "KSM settings restored.");
     }
 }
