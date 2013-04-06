@@ -862,7 +862,7 @@
         <item>26</item>
     </string-array>
     
-        <string-array name="pref_ram_size_entries">
+    <string-array name="pref_ram_size_entries">
         <item>383mb (default)</item>
         <item>396mb (bigmem)</item>
         <item>409mb (hugemem)</item>
@@ -872,6 +872,20 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+    </string-array>
+    
+    <string-array name="pref_uksm_cpu_entries">
+        <item>Full</item>
+        <item>Medium</item>
+        <item>Low</item>
+	<item>Quiet (default)</item>
+    </string-array>
+
+    <string-array name="pref_uksm_cpu_values" translatable="false">
+        <item>full</item>
+        <item>medium</item>
+        <item>low</item>
+	<item>quiet</item>
     </string-array>
 
     <string-array name="dithering_entries" translatable="false">
