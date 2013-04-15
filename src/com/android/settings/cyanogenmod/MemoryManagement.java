@@ -52,12 +52,20 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
     private static final String PURGEABLE_ASSETS_PERSIST_PROP = "persist.sys.purgeable_assets";
 
     private static final String PURGEABLE_ASSETS_DEFAULT = "0";
+    
+    public static final String RAM_FILE = "/sys/kernel/bigmem/enable";
+    
+    public static final String RAM_PREF = "pref_ram_size";
+    
+    private static final String RAM_DEFAULT = "0";
 
     private ListPreference mzRAM;
 
     private CheckBoxPreference mPurgeableAssetsPref;
 
     private CheckBoxPreference mKSMPref;
+    
+    private ListPreference mRAM;
 
     private int swapAvailable = -1;
 
@@ -74,6 +82,7 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
             mzRAM = (ListPreference) prefSet.findPreference(ZRAM_PREF);
             mPurgeableAssetsPref = (CheckBoxPreference) prefSet.findPreference(PURGEABLE_ASSETS_PREF);
             mKSMPref = (CheckBoxPreference) prefSet.findPreference(KSM_PREF);
+            mRAM = (ListPreference) prefSet.findPreference(RAM_PREF);
 
             if (isSwapAvailable()) {
                 if (SystemProperties.get(ZRAM_PERSIST_PROP) == "1")
@@ -88,6 +97,13 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 mKSMPref.setChecked(KSM_PREF_ENABLED.equals(Utils.fileReadOneLine(KSM_RUN_FILE)));
             } else {
                 prefSet.removePreference(mKSMPref);
+            }
+            
+            if (Utils.fileExists(RAM_FILE)) {
+                mRAM.setValue((Utils.fileReadOneLine(RAM_FILE)));
+                mRAM.setOnPreferenceChangeListener(this);
+            } else {
+                prefSet.removePreference(mRAM);
             }
 
             String purgeableAssets = SystemProperties.get(PURGEABLE_ASSETS_PERSIST_PROP,
@@ -121,7 +137,14 @@ public class MemoryManagement extends SettingsPreferenceFragment implements
                 return true;
             }
         }
-
+        if (preference == mRAM) {
+	    if (newValue != null) {
+		if (Utils.fileExists(RAM_FILE)) {
+		    Utils.fileWriteOneLine(RAM_FILE, (String) newValue);
+		    return true;
+		}
+	    }
+	}
         return false;
     }
 

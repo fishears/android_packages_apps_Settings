@@ -4713,6 +4713,9 @@
     <!-- Purgeable Assets -->
     <string name="pref_purgeable_assets_title">Allow purging of assets</string>
     <string name="pref_purgeable_assets_summary">Purging of bitmap memory assets allows the freeing of more RAM when needed (requires reboot)</string>
+    <!-- RAM -->
+    <string name="pref_ram_title">RAM Size</string>
+    <string name="pref_ram_summary">Select available RAM size. (Requires reboot and hugemem breaks 720p video recording)</string>
 
     <!-- Performance Settings : Dithering -->
     <string name="pref_use_dithering_title">Surface improvement</string>

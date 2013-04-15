@@ -36,5 +36,13 @@
         android:key="pref_ksm"
         android:title="@string/pref_ksm_title"
         android:summary="@string/pref_ksm_summary" />
+	
+    <ListPreference
+        android:key="pref_ram_size"
+        android:dialogTitle="@string/pref_ram_title"
+        android:title="@string/pref_ram_title"
+        android:summary="@string/pref_ram_summary"
+        android:entries="@array/pref_ram_size_entries"
+        android:entryValues="@array/pref_ram_size_values" />
 
 </PreferenceScreen>

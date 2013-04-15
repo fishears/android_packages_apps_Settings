@@ -1018,6 +1018,18 @@
         <item>18</item>
         <item>26</item>
     </string-array>
+    
+        <string-array name="pref_ram_size_entries">
+        <item>383mb (default)</item>
+        <item>396mb (bigmem)</item>
+        <item>409mb (hugemem)</item>
+    </string-array>
+
+    <string-array name="pref_ram_size_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 
     <string-array name="entries_status_bar_am_pm">
         <item>Normal</item>
