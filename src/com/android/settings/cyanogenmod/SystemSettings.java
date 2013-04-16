@@ -18,12 +18,13 @@ package com.android.settings.cyanogenmod;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -40,8 +41,7 @@ import com.android.settings.Utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SystemSettings extends SettingsPreferenceFragment  implements
-        Preference.OnPreferenceChangeListener {
+public class SystemSettings extends SettingsPreferenceFragment {
     private static final String TAG = "SystemSettings";
 
     private static final String KEY_BATTERY_LIGHT = "battery_light";
@@ -187,24 +187,6 @@ public class SystemSettings extends SettingsPreferenceFragment  implements
         } else {
             mPieControl.setSummary(getString(R.string.pie_control_disabled));
         }
-    }
-
-    private boolean removePreferenceIfPackageNotInstalled(Preference preference) {
-        String intentUri = ((PreferenceScreen) preference).getIntent().toUri(1);
-        Pattern pattern = Pattern.compile("component=([^/]+)/");
-        Matcher matcher = pattern.matcher(intentUri);
-
-        String packageName = matcher.find() ? matcher.group(1) : null;
-        if (packageName != null) {
-            try {
-                getPackageManager().getPackageInfo(packageName, 0);
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "package " + packageName + " not installed, hiding preference.");
-                getPreferenceScreen().removePreference(preference);
-                return true;
-            }
-        }
-        return false;
     }
     
     @Override
