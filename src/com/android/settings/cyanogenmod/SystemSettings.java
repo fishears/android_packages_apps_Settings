@@ -137,15 +137,6 @@ public class SystemSettings extends SettingsPreferenceFragment  implements
 	mRamBar = findPreference(KEY_RECENTS_RAM_BAR);
         updateRamBar();
 
-        // Preferences that applies to all users
-        // Pie controls
-        mPieControl = (PreferenceScreen) findPreference(KEY_PIE_CONTROL);
-        if (mPieControl != null && removeNavbar) {
-            // Remove on devices without a navbar to start with
-            prefScreen.removePreference(mPieControl);
-            mPieControl = null;
-        }
-
         // Expanded desktop
         mExpandedDesktopPref = (ListPreference) findPreference(KEY_EXPANDED_DESKTOP);
         mExpandedDesktopNoNavbarPref = (CheckBoxPreference) findPreference(KEY_EXPANDED_DESKTOP_NO_NAVBAR);
@@ -228,10 +219,13 @@ public class SystemSettings extends SettingsPreferenceFragment  implements
     }
 
     private void updatePieControlDescription() {
-        if (Settings.System.getInt(getActivity().getContentResolver(),
-                Settings.System.PIE_CONTROLS, 0) == 1) {
+        int pie = Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.PIE_CONTROLS, 0);
+        if (pie == 2) {
             mPieControl.setSummary(getString(R.string.pie_control_enabled));
-        } else {
+        } else if (pie == 1) {
+            mPieControl.setSummary(getString(R.string.pie_control_exp_enabled));
+	} else {
             mPieControl.setSummary(getString(R.string.pie_control_disabled));
         }
     }

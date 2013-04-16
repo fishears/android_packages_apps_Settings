@@ -908,7 +908,8 @@ rience. Enable at your own discretion.</string>
 
     <!-- Pie controls -->
     <string name="pie_control_title">Pie controls</string>
-    <string name="pie_control_enabled">Floating controls when Expanded desktop is enabled</string>
+    <string name="pie_control_enabled">Floating control enabled</string>
+    <string name="pie_control_exp_enabled">Floating controls enabled when Expanded desktop is active</string>
     <string name="pie_control_disabled">Floating controls disabled</string>
     <string name="pie_control_size">Navigation key size</string>
     <string name="pie_control_trigger_positions">Trigger positions</string>
